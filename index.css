@@ -1,0 +1,33 @@
+body {
+	font-size: Large;
+	background-color: #222629;
+	color: white;
+}
+
+div {
+	border-style: ridge hidden ridge ridge;
+	border-color: #474B4F;
+}
+
+h1 {
+	margin-left: 2%;
+	color: #86C232;
+}
+
+h2 {
+	margin-left: 3%;
+	color: #61892F;
+}
+
+p {
+	margin-left: 3%;
+}
+
+a:link {color: #CEBC81;}
+a:visited {color: #A16183;}
+a:hover {color: #D6CE15;}
+a:active {color: #10E7DC;}
+
+b {
+	color: #61892F;
+}
