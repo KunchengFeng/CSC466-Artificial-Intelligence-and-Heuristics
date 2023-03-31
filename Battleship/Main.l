@@ -3,8 +3,10 @@
 (load "Row.l")
 (load "Board.l")
 (load "Ship.l")
+(load "Location.l")
 (load "HumanPlayer.l")
 (load "RandomPlayer.l")
+(load "RandomPlayerPlus.l")
 
 
 ; Main method to start everything -------------------------------------------------
@@ -25,7 +27,7 @@
 	(setf ships2 (reverse (generateShips)))
 
 	(setf human (newHumanPlayer board1 board2 ships1))
-	(setf ai (newRandomPlayer board2 board1 ships2))
+	(setf ai (newRandomPlayerPlus board2 board1 ships2))
 
 	(playerPlaceShips human)
 	(playerPlaceShips ai)

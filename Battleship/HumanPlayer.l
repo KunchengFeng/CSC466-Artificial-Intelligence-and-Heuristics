@@ -2,6 +2,7 @@
 
 (defclass humanPlayer()
     (
+        (name :accessor player-name :initform 'HumanPlayer)
         (thisBoard :accessor player-board :initarg :thisBoard)
         (otherBoard :accessor player-otherBoard :initarg :otherBoard)
         (ships :accessor player-ships :initarg :ships)
@@ -61,7 +62,7 @@
     (setf myBoard (player-board p))
     (setf enemyBoard (player-otherBoard p))
 
-    (format t "Your markers and your board: ~%")
+    (format t "~%~%~%Your markers and your board: ~%")
     (displayBoth myBoard enemyBoard)
 
     ; Give a little feedback on where the enemy recently fired.

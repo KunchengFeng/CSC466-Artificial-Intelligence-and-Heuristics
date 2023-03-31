@@ -226,3 +226,44 @@
 	result
 )
 ; ----------------------------------------------------------------------------------
+
+
+; Randomly place a ship, this method is popular with a few random players ----------
+(defmethod randomlyPlaceShip((s ship) (b board) &aux pos)
+    (setf pos (getRandomPosition s b))
+    (placeShip (first pos) (second pos) (third pos) (fourth pos) s b)
+)
+
+(defmethod getRandomPosition((s ship) (b board) &aux size maxX maxY x1 y1 x2 y2)
+    ; Note! Ship positioning is inclusive, the -1 is needed here!
+    (setf size (- (get '*shipSize* (ship-type s)) 1))
+
+    ; Ship is either placed (left to right) or (small Y to big Y).
+    (setf maxX (- (board-width b) size))
+    (setf maxY (- (length (board-rows b)) size))
+
+    (loop
+        (setf x1 (random maxX))
+        (setf y1 (random maxY))
+    
+        ; Roll a number of either 0 or 1;
+        ; 0 will result in horizontal placement,
+        ; 1 will result in vertical placement.
+        (cond
+            ((= (random 2) 0)
+                (setf x2 (+ x1 size))
+                (setf y2 y1)
+            )
+            (t
+                (setf x2 x1)
+                (setf y2 (+ y1 size))
+            )
+        )
+
+        (when
+            (equal (checkValidNoText x1 y1 x2 y2 s b) t)
+            (return (list x1 y1 x2 y2))
+        )
+    )
+)
+; ----------------------------------------------------------------------------------
