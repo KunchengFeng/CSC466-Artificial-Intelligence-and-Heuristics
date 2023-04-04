@@ -48,7 +48,7 @@
 ; then the adjacent unexplored locations will be add to the preferred list to explore.
 (defmethod playerOpenFire((p randomPlayerPlus) &aux location hit)
    (setf location (getNextLocation p))
-   (setf hit (fireAtLocation location p))
+   (setf hit (fireAtLocation location (player-otherBoard p)))
    (modifyLists location hit p)
 )
 
@@ -69,19 +69,6 @@
     location
 )
 
-; Returns T if it hits a target, else return nil.
-; Note that the lists are modified before return.
-(defmethod fireAtLocation((l location) (p randomPlayerPlus) &aux x y board)
-    ; Fire at the given location
-    (setf x (location-x l))
-    (setf y (location-y l))
-    (setf board (player-otherBoard p))
-    (fireAtBoard x y board)
-
-    ; Check the result
-    (isCellHit (getCell x y board))
-)
-
 ; Modifies the three lists that this player keeps based on the previous fire results.
 ; Returns nothing
 (defmethod modifyLists((l location) hit (p randomPlayerPlus) &aux unexplored explored preferred)
@@ -90,7 +77,7 @@
     (setf explored (player-explored p))
     (setf preferred (player-preferred p))
 
-    ; Remove the location from the unexplored / preferred and add to explored
+    ; Remove the current location from the (unexplored / preferred) list, and add it to explored
     (setf unexplored (remove l unexplored))
     (setf preferred (remove l preferred))
     (setf explored (cons l explored))
