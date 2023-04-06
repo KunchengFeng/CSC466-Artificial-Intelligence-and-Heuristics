@@ -34,23 +34,40 @@
     ; Fire at the given location
     (setf x (location-x l))
     (setf y (location-y l))
-    (fireAtBoard x y board)
+    (fireAtBoard x y b)
 
     ; Check the result
     (isCellHit (getCell x y b))
 )
 
+; Return the cell found at location
+(defmethod getLocationCell((l location) (b board) &aux x y)
+    (setf x (location-x l))
+    (setf y (location-y l))
+    (getCell x y b)
+)
+
 ; Returns T/F
-(defmethod isLocationHit((l location) (b board) &aux x y)
-    (cond
-        ((equal l nil)
-            nil
-        )
-        (t
-            (setf x (location-x l))
-            (setf y (location-y l))
-            (isCellHit (getCell x y b))
-        )
+(defmethod isLocationHit((l location) (b board))
+    (isCellHit (getLocationCell l b))
+)
+
+; Accounts for nil case in RandomPlayerPlusPlus
+(defmethod isLocationHit(notAnLocation (b board))
+    nil
+)
+
+; Returns a ship instance
+(defmethod getLocationShip((l location) (b board))
+    (cell-resident (getLocationCell l b))
+)
+
+; Returns T/F
+(defmethod isLocationSunk((l location) (b board) &aux ship)
+    (setf ship (getLocationShip l b))
+    (if (equal ship nil)
+        nil
+        (isShipSunk ship)
     )
 )
 

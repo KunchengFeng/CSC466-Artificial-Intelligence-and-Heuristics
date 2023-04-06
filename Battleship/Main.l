@@ -8,9 +8,10 @@
 (load "RandomPlayer.l")
 (load "RandomPlayerPlus.l")
 (load "RandomPlayerPlusPlus.l")
+(load "TierListPlayer.l")
 
 
-; Main method to start everything -------------------------------------------------
+; Human vs AI ----------------------------------------------------------------------------------------
 (defun play(&aux human ai num board1 board2 ships1 ships2 winner)
 	; Some info to help the player get started.
 	(format t "Welcome to the Battleship game.~%")
@@ -27,26 +28,14 @@
 	(setf ships1 (reverse (generateShips)))
 	(setf ships2 (reverse (generateShips)))
 
-	(setf human (newHumanPlayer board1 board2 ships1))
+	(setf human (createPlayer 0 board1 board2 ships1))
 	(format t "Choose your Opponent: ~%")
 	(format t "Enter 1 for 'Random Player'~%")
 	(format t "Enter 2 for 'Random Player Plus'~%")
 	(format t "Enter 3 for 'Random Player Plus Plus'~%")
+	(format t "Enter 4 for 'TierListPlayer'~&")
 	(setf num (read))
-	(cond
-		((equal num 1)
-			(setf ai (newRandomPlayer board2 board1 ships2))
-		)
-		((equal num 2)
-			(setf ai (newRandomPlayerPlus board2 board1 ships2))
-		)
-		((equal num 3)
-			(setf ai (newRandomPlayerPlusPlus board2 board1 ships2))
-		)
-		(t
-			(bye)
-		)
-	)
+	(setf ai (createPlayer num board2 board1 ships2))
 
 	(playerPlaceShips human)
 	(playerPlaceShips ai)
@@ -73,6 +62,36 @@
 	ships
 )
 
+; Return a player instance.
+(defun createPlayer(num (this board) (other board) (ships list))
+	(cond
+		; 0 = human player
+		((equal num 0)
+			(newHumanPlayer this other ships)
+		)
+		; 1 = random player
+		((equal num 1)
+			(newRandomPlayer this other ships)
+		)
+		; 2 = random player +
+		((equal num 2)
+			(newRandomPlayerPlus this other ships)
+		)
+		; 3 = random player ++
+		((equal num 3)
+			(newRandomPlayerPlusPlus this other ships)
+		)
+		; 4 = tier list player
+		((equal num 4)
+			(newTierListPlayer this other ships)
+		)
+		(t
+			(format t "No player correspond to the number entered: ~A~%" num)
+			(bye)
+		)
+	)
+)
+
 ; Return the victor player's instance.
 (defun takeTurn(player1 player2 &aux p1Win p2Win)
 	(playerOpenFire player1)
@@ -97,77 +116,60 @@
 	)
 )
 
-; A quick game intended for two AIs, only the end result shall be displayed if desired
-; Returns the winner's instance or nil
-(defun quickGame(p1Num p2Num &optional text &aux b1 b2 s1 s2 p1 p2 winner)
-	; Basic game objects
-	(setf b1 (newBoard 10 10))
-	(setf b2 (newBoard 10 10))
-	(setf s1 (reverse (generateShips)))
-	(setf s2 (reverse (generateShips)))
 
-	; Set up player 1
-	(cond
-		((equal p1Num 1)
-			(setf p1 (newRandomPlayer b1 b2 s1))
-		)
-		((equal p1Num 2)
-			(setf p1 (newRandomPlayerPlus b1 b2 s1))
-		)
-		((equal p1Num 3)
-			(setf p1 (newRandomPlayerPlusPlus b1 b2 s1))
-		)
-		(t
-			(format t "Player 1's number do not corrolate to any AI player.~%")
-			(bye)
+; AI vs AI ------------------------------------------------------------------------------------
+(setf *AIs* '(randomPlayer randomPlayerPlus randomPlayerPlusPlus tierListPlayer))
+(defun getStatistics(&aux n1 n2 iterations player1 player2 winner b1 b2 s1 s2 v1 v2 draw)
+	; Get basic informations
+	(format t "Available AIs: ~%")
+	(dotimes (n (length *AIs*))
+		(format t "~A - ~A~%" (+ n 1) (nth n *AIs*))
+	)
+	(format t "Enter a corresponding number to choose AI 1: ")
+	(setf n1 (read))
+	(format t "Enter a corresponding number to choose AI 2: ")
+	(setf n2 (read))
+	(format t "Enter the number of iterations: ")
+	(setf iterations (read))
+
+	; Initialize
+	(setf v1 0)
+	(setf v2 0)
+	(setf draw 0)
+
+	(dotimes (n iterations)
+		; Set up necessary instances
+		(setf b1 (newBoard 10 10))
+		(setf b2 (newBoard 10 10))
+		(setf s1 (generateShips))
+		(setf s2 (generateShips))
+		(setf player1 (createPlayer n1 b1 b2 s1))
+		(setf player2 (createPlayer n2 b2 b1 s2))
+
+		; Play the game
+		(playerPlaceShips player1)
+		(playerPlaceShips player2)
+		(setf winner (takeTurn player1 player2))
+
+		; Keep track
+		(cond
+			((equal winner player1)
+				(setf v1 (+ v1 1))
+			)
+			((equal winner player2)
+				(setf v2 (+ v2 1))
+			)
+			(t
+				(setf draw (+ draw 1))
+			)
 		)
 	)
 
-	; Set up player 2
-	(cond
-		((equal p2Num 1)
-			(setf p2 (newRandomPlayer b2 b1 s2))
-		)
-		((equal p2Num 2)
-			(setf p2 (newRandomPlayerPlus b2 b1 s2))
-		)
-		((equal p2Num 3)
-			(setf p2 (newRandomPlayerPlusPlus b2 b1 s2))
-		)
-		(t
-			(format t "Player 2's number do not corrolate to any AI player.~%")
-			(bye)
-		)
-	)
+	; Report the result
+	(format t "~%~A games played: ~%" iterations)
+	(format t "Player 1 (~A) victories: ~A~%" (player-name player1) v1)
+	(format t "Player 2 (~A) victories: ~A~%" (player-name player2) v2)
+	(format t "Draws: ~A~%" draw)
 
-	; Have players place ships
-	(playerPlaceShips p1)
-	(playerPlaceShips p2)
-
-	; Player the game until the end
-	(setf winner (takeTurn p1 p2))
-
-	; Display text if needed
-	(cond
-		((equal text t)
-			; Announce the winner
-			(if (equal winner nil)
-				(format t "It's a draw!")
-			)
-			(if (equal winner p1)
-				(format t "Player 1 (~A) won!~%" (player-name p1))
-			)
-			(if (equal winner p2)
-				(format t "Player 2 (~A) won!~%" (player-name p2))
-			)
-
-			; Display the final state
-			(format t "~%Player 1's board:~%")
-			(display b1)
-			(format t "~%Player 2's board:~%")
-			(display b2)
-		)
-	)
-
-	winner
+	nil
 )

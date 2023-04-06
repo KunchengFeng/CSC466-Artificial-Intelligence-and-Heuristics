@@ -71,7 +71,7 @@
 ; Main difference here ↓
 ; This player will infer the ship placement after consecutive hits;
 ; Player will also remove adjacent cells from preferred list after sinking the ship
-(defmethod modifyLists((l location) hit (p randomPlayerPlusPlus) &aux unexplored explored preferred left right up down)
+(defmethod modifyLists((l location) hit (p randomPlayerPlusPlus) &aux unexplored explored preferred board adjacent)
     ; Get the player's lists in place
     (setf unexplored (player-unexplored p))
     (setf explored (player-explored p))
@@ -82,41 +82,42 @@
     (setf preferred (remove l preferred))
     (setf explored (cons l explored))
 
-    ; Get the neighboring locations that have been fired upon
-    (setf left (getLeftAdjacent l explored))
-    (setf right (getRightAdjacent l explored))
-    (setf up (getAboveAdjacent l explored))
-    (setf down (getBelowAdjacent l explored))
-    ; Note, only the unexplored list elements will be moved to preferred list.
+    ; Note:
+    ;   only from the explored list elements will be checked for consecutive hits.
+    ;   only the unexplored list elements will be moved to preferred list.
+    ;   the ? mark represent the location that will be moved to the preferred list if not nil.
+    (setf board (player-otherBoard p))
     (cond
-        ; If both this and left adjacent are hit, add only the right adjacent to preferred list
-        ((and (isLocationHit left) hit)
-            (if (not (equal right nil))
-                (setf preferred (cons right preferred))
-            )
+        ; | x | x | ? |
+        ((and (isLocationHit (getLeftAdjacent l explored) board) hit)
+            (setf adjacent (getRightAdjacent l unexplored))
         )
-        ; If both this and right adjacent are hit, add only the left adjacent to preferred list
-        ((and (isLocationHit right) hit)
-            (if (not (equal left nil))
-                (setf preferred (cons left preferred))
-            )
+        ; | ? | x | x |
+        ((and (isLocationHit (getRightAdjacent l explored) board) hit)
+            (setf adjacent (getLeftAdjacent l unexplored))
         )
-        ; If both this and above adjacent are hit, add only the below adjacent to preferred list
-        ((and (isLocationHit up) hit)
-            (if (not (equal down nil))
-                (setf preferred (cons down preferred))
-            )
+        ; x
+        ; x
+        ; ?
+        ((and (isLocationHit (getAboveAdjacent l explored) board) hit)
+            (setf adjacent (getBelowAdjacent l unexplored))
         )
-        ; If both this and the below adjacent are hit, add only the above adjacent to preferred list
-        ((and (isLocationHit down) hit)
-            (if (not (equal up nil))
-                (setf preferred (cons up preferred))
-            )
+        ; ?
+        ; x
+        ; x
+        ((and (isLocationHit (getBelowAdjacent l explored) board) hit)
+            (setf adjacent (getAboveAdjacent l unexplored))
         )
-        ; If only this location is hit, add all adjacent to preferred list
+        ; |   | ? |   |
+        ; | ? | x | ? |
+        ; |   | ? |   |
         (hit
+            (setf adjacent nil)
             (setf preferred (append (getAdjacents l unexplored) preferred))
         )
+    )
+    (if (not (equal adjacent nil))
+        (setf preferred (cons adjacent preferred))
     )
 
     ; Write back the modified values
