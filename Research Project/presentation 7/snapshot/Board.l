@@ -25,26 +25,8 @@
 
 
 ; Get a specified cell ---------------------------------------------------
-(defmethod getCell(x y (b board) &aux width height)
-	(setf width (board-width b))
-	(setf height (length (board-rows b)))
-	(cond
-		((< x 0)
-			nil
-		)
-		((>= x width)
-			nil
-		)
-		((< y 0)
-			nil
-		)
-		((>= y height)
-			nil
-		)
-		(t
-			(getCellFromRow x (nth y (board-rows b)))
-		)
-	)
+(defmethod getCell(x y (b board))
+	(getCellFromRow x (nth y (board-rows b)))
 )
 ; ------------------------------------------------------------------------
 

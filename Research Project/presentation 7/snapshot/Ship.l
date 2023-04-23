@@ -78,7 +78,7 @@
 
 ; This one is for non-players
 (defmethod checkValidNoText(x1 y1 x2 y2 (s ship) (b board) &aux shipType result)
-	(setf shipType (ship-type s))
+(setf shipType (ship-type s))
 	(setf result t)
 	(cond
 		((not (checkType shipType))
@@ -142,9 +142,14 @@
 	)
 	(setf result t)
 	(loop for cell in cells do
-		(setf result (and result (isCellEmpty cell)))
+		(setf result (and result (checkCell cell)))
 	)
 	result
+)
+
+; Check if the cell is empty
+(defmethod checkCell((c cell))
+	(equal (cell-resident c) nil)
 )
 ; ----------------------------------------------------------------------------------------------------
 
@@ -262,68 +267,3 @@
     )
 )
 ; ----------------------------------------------------------------------------------
-
-
-; Randomly place a ship, but none of its locations are adjacent to another ship ---------
-(defmethod noneAdjacentPlaceShip((s ship) (b board) &aux pos)
-	(setf pos (getNoneAdjacentPosition s b))
-	(placeShip (first pos) (second pos) (third pos) (fourth pos) s b)
-)
-
-(defmethod getNoneAdjacentPosition((s ship) (b board) &aux x1 y1 x2 y2)
-	(setf size (- (get '*shipSize* (ship-type s)) 1))
-	(setf maxX (- (board-width b) size))
-	(setf maxY (- (length (board-rows b)) size))
-
-	(loop
-		(setf x1 (random maxX))
-		(setf y1 (random maxY))
-		(if (= (random 2) 0)
-			(progn
-				(setf x2 (+ x1 size))
-				(setf y2 y1)
-			)
-			(progn
-				(setf x2 x1)
-				(setf y2 (+ y1 size))
-			)
-		)
-
-		(when (and (checkValidNoText x1 y1 x2 y2 s b) (checkNoneAdjacents x1 y1 x2 y2 b))
-			(return (list x1 y1 x2 y2))
-		)
-	)
-)
-
-(defmethod checkNoneAdjacents(x1 y1 x2 y2 b &aux result)
-	(setf result t)
-	(if (= x1 x2)
-		; Ship is placed vertically
-		(loop for y from y1 to y2 do
-			(setf result (and result (checkCellAdjacent x1 y b)))
-		)
-		; Ship is placed horizontally
-		(loop for x from x1 to x2 do
-			(setf result (and result (checkCellAdjacent x y1 b)))
-		)
-	)
-	result
-)
-
-(defmethod checkCellAdjacent(x y b &aux leftCell rightCell aboveCell belowCell result)
-	(setf leftCell (getCell (- x 1) y b))
-	(setf rightCell (getCell (+ x 1) y b))
-	(setf aboveCell (getCell x (- y 1) b))
-	(setf belowCell (getCell x (+ y 1) b))
-	(setf result t)
-
-	; Each adjacent cell should not be occupied by anything.
-	(loop for cell in (list leftCell rightCell aboveCell belowCell) do
-		(if (notNilAndNotEmpty cell)
-			(setf result nil)
-		)
-	)
-	
-	result
-)
-; -------------------------------------------------------------------------------------

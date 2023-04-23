@@ -10,9 +10,8 @@
 (load "RandomPlayerPlusPlus.l")
 (load "TierListPlayer.l")
 (load "TierListPlayerPlus.l")
-(load "TierListPlayerPlusPlus.l")
 
-(setf *AIs* '(randomPlayer randomPlayerPlus randomPlayerPlusPlus tierListPlayer tierListPlayerPlus tierListPlayerPlusPlus))
+(setf *AIs* '(randomPlayer randomPlayerPlus randomPlayerPlusPlus tierListPlayer tierListPlayerPlus))
 
 ; Human vs AI ----------------------------------------------------------------------------------------
 (defun play(&aux human ai num board1 board2 ships1 ships2 winner)
@@ -92,10 +91,6 @@
 		((equal num 5)
 			(newTierListPlayerPlus this other ships)
 		)
-		; 6 = tier list player ++
-		((equal num 6)
-			(newTierListPlayerPlusPlus this other ships)
-		)
 		(t
 			(format t "No player correspond to the number entered: ~A~%" num)
 			(bye)
@@ -151,8 +146,8 @@
 		; Set up necessary instances
 		(setf b1 (newBoard 10 10))
 		(setf b2 (newBoard 10 10))
-		(setf s1 (reverse (generateShips)))
-		(setf s2 (reverse (generateShips)))
+		(setf s1 (generateShips))
+		(setf s2 (generateShips))
 		(setf player1 (createPlayer n1 b1 b2 s1))
 		(setf player2 (createPlayer n2 b2 b1 s2))
 

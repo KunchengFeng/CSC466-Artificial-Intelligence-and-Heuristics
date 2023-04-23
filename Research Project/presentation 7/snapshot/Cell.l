@@ -33,17 +33,6 @@
 	)
 )
 
-(defmethod isCellEmpty((c cell))
-	(equal (cell-resident c) nil)
-)
-
-(defmethod notNilAndNotEmpty((c cell))
-	(not (isCellEmpty c))
-)
-
-(defmethod notNilAndNotEmpty(NotCell)
-	nil
-)
 
 ; Display Methods -------------------------------------------------------------
 ; This method display the player's board, includes the ship if present.

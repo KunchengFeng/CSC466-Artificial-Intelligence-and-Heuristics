@@ -8,10 +8,7 @@
 ; 3 tier = preferred tier, will randomly pick from here before picking from 2nd tier.
 ; 4 tier = critical tier, will always be picked first.
 
-; This player will prioritize exploring locations at higher tiers.
-; A hit will put the adjacent locations into tier 3.
-; A consecutive hit will put the inferred locations into tier 4.
-; A miss will put the adjacent locations into tier 1.
+; This player also addresses the short comings of RandomPlayer++ not recognizing unsunk parallel ships.
 
 (defclass tierListPlayer()
     (
