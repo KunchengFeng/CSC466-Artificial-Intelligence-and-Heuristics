@@ -90,8 +90,8 @@
 
 
 ; AI vs AI ------------------------------------------------------------------------------------
-(defun getStatistics(&aux p1Type p2Type iterations counter gameStatistics)
-	; Get user input
+(defun getStatistics(&aux p1Type p2Type iterations gameStatistics)
+	; Get basic informations
 	(format t "Available AIs: ~%")
 	(dotimes (n (length *AIs*))
 		(format t "~A - ~A~%" (+ n 1) (nth n *AIs*))
@@ -103,22 +103,11 @@
 	(format t "Enter the number of iterations: ")
 	(setf iterations (read))
 	
-	; Some setup
+	; Entering hte loop
 	(setf gameStatistics (newGameStatistics))
 	(format t "Simulating games ...~%~%")
-	(setf counter 0)
-
-	; Entering the main loop
 	(dotimes (i iterations)
 		(combineResult gameStatistics (quickGame p1Type p2Type))
-		; This is for periodic update at the terminal, since I don't like to stare at 
-		(setf counter (+ counter 1))
-		(if (= counter 50)
-			(progn
-				(setf counter 0)
-				(format t "~A games played...~%" (+ i 1))
-			)
-		)
 	)
 
 	(displayStatistics gameStatistics)
